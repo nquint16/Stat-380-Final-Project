@@ -1,0 +1,90 @@
+---
+title: "stst 380"
+author: "Aishwarya Penmetcha"
+date: '2022-04-25'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library("tidyverse") # Lots of data processing commands
+library("knitr")     # Helps make good output files
+library("ggplot2")   # Output plots
+library("rmarkdown") # Helps make good output files
+library("lattice")   # Makes nice plots
+library("RColorBrewer") # Makes nice color-scales
+library("skimr")     # Summary statistics
+library("Stat2Data") # Regression specific commands
+library("corrplot")  # correlation plots
+library("GGally")    # correlation plots
+library("ggpubr")    # QQplots
+library("olsrr")     # Regression specific commands
+library("plotly")    # Interactive plots
+library("readxl")    # Read from excel files
+library("equatiomatic") # extract equations
+library("ggstatsplot")
+library("visreg")
+```
+
+```{r}
+farmdat<- read_excel("stat_380_studentFarm data.xlsx")
+head(farmdat)
+```
+
+```{r}
+ggstatsplot::gghistostats(
+  data            = farmdat,
+  x               = Quantity,
+  xlab            = "Quantity in pounds",
+  centrality.type = "mean"
+)
+```
+
+```{r}
+sum(is.na(farmdat$Variety))
+#farmdat<-na.omit(farmdat$Variety)
+
+
+```
+
+
+```{r}
+model<- lm(Quantity~Line_Total+Variety, data = farmdat) 
+summary(model)
+
+```
+
+```{r}
+ggqqplot(farmdat$Quantity,col="blue")
+```
+
+
+```{r}
+library(leaps)
+regfit.full <- regsubsets(Quantity~., data = farmdat)
+summary(regfit.full)
+
+```
+
+
+```{r}
+farmdat%>%
+  ggplot(aes(Quantity,fill=Sub_Unit))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Quantity by Sub_Unit")+
+  theme_bw()
+```
+
+
+```{r}
+farmdat%>%
+  ggplot(aes(Unit_Price,fill=Sub_Unit))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Unit_Price by Sub_Unit")+
+  theme_bw()
+```
+
+

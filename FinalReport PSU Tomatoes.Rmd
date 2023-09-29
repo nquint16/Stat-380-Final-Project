@@ -1,0 +1,267 @@
+---
+title: "Presentation Assignment"
+author: "TEAM 13"
+date: "4/27/2022"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+
+Import the data and load the required packages
+```{r}
+suppressPackageStartupMessages(library(ggplot2))
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(corrplot))
+suppressPackageStartupMessages(library(readxl))
+#df = read.csv(file.choose(),header = T,stringsAsFactors = T)
+farmdat= read_excel("stat_380_studentFarm dataFinal.xlsx")
+farmdat2 = read_excel("stat_380_studentFarm dataFinal.xlsx")
+```
+
+## INTRODUCTION 
+
+The primary goal of this study is to identify factors that impact the quantity and unit pricing of tomatoes. To find the factors that influence the quantity and unit price of the tomatoes, we must perform an analysis of variance, Pearson's correlation, and exploratory data analysis. The following are the research questions:
+
+i. Does tomato sub-unit have any impact on the tomato quantity?
+
+ii. Is there a relationship between tomato sub-unit and unit price of the tomato?
+
+iii. Is there a relationship between unit price and variety
+
+iv. Is there a relationship between tomato variety and tomato quantity
+
+
+# Description of the data
+```{r}
+str(farmdat)
+```
+
+The majority of the variables in this data frame are categorical, according to the structure of the data frame. The data set has 331 observations and 9 variables. The unit price, quantity, and invoice are all numerical values.
+
+
+First 6 observation of the data}
+```{r}
+head(farmdat)
+```
+
+
+## Exploratory Data Analysis
+
+Boxplot of Quantity by Sub_unit
+```{r}
+farmdat%>%
+  ggplot(aes(Quantity,fill=Sub_Unit))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Quantity by Sub_Unit")+
+  theme_bw()
+```
+
+There are just a few outliers, according to the boxplot. The majority of the values based on the sub-units do not follow a normal distribution. The quantities for sub-units do not have an equal mean, indicating that there is a considerable variance There are just a few outliers, according to the boxplot. The majority of the values based on the sub-units do not follow a normal distribution. The quantities for sub-units do not have an equal mean, indicating that there is a considerable variance between sub-units. 
+
+
+Boxplot of Unit_Price by Sub_unit
+```{r}
+farmdat%>%
+  ggplot(aes(Unit_Price,fill=Sub_Unit))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Unit_Price by Sub_Unit")+
+  theme_bw()
+```
+
+According to the boxplot, the variable Unit Price is not normally distributed, hence there is no obvious evidence of a relationship between Sub Unit and Unit Price. This variable must be transformed using the log-function.
+
+
+
+Boxplot of log(Unit_Price) by Sub_unit
+```{r}
+farmdat%>%
+  ggplot(aes(log(Unit_Price),fill=Sub_Unit))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Unit_Price by Sub_Unit")+
+  theme_bw()
+```
+
+After we transformed the Unit Price, there is clear evidence that the mean of the Unit Price is not equal for all sub-units, implying that there is a relationship between Sub Unit and Unit Price.
+
+
+Boxplot of log(Unit_Price) by Variety
+```{r}
+farmdat%>%
+  ggplot(aes(log(Unit_Price),fill=Variety))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Unit_Price by Variety")+
+  theme_bw()
+```
+
+The boxplot above shows that tomato varieties have a significant difference Unit_Price on average.
+
+
+
+Boxplot of Quantity based on Sub_Unit.
+```{r}
+farmdat%>%
+  ggplot(aes(Quantity,fill=Sub_Unit))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Quantity by Sub_Unit")+
+  theme_bw()
+```
+
+According to this boxplot, the tomato sub-units show a substantial difference in average quantity.
+
+
+Boxplot of Quantity based on Variety.
+```{r}
+farmdat%>%
+  ggplot(aes(Quantity,fill=Variety))+
+  geom_boxplot()+
+  labs(title = "Boxplot of Quantity by Variety")+
+  theme_bw()
+```
+
+
+
+According to the boxplot, the tomato varieties show a substantial difference in average quantity.
+
+
+
+Histogram of Quantity
+```{r}
+farmdat%>%
+  ggplot(aes(Quantity))+
+  geom_histogram(bins = 10,aes(fill="red",col=2))+
+  labs(title = "Histogram of Quantity")+
+  theme_bw()
+```
+
+
+According to the histogram, the majority of the quantity falls between 10 and 20. There is a positive skewness or a long right tail. As a result, the quantity does not follow normal distribution.
+
+
+Histogram of Unit_Price
+```{r}
+farmdat%>%
+  ggplot(aes(Unit_Price))+
+  geom_histogram(bins = 10,aes(fill="red",col=2))+
+  labs(title = "Histogram of Unit_Price")+
+  theme_bw()
+```
+
+
+Unit Price's histogram has a positive skewness and hence does not follow the normal distribution.
+
+
+
+
+## Correlation
+
+The Pearson's correlation measures the direction and strength of the linear relationship among the numerical data.
+
+Correlation heat map
+```{r}
+Corr = cor(farmdat[sapply(farmdat, is.numeric)])
+corrplot(Corr,method = "number")
+```
+According to the correlation findings, there is no substantial association between the numerical data. The predictor variable has a slight negative association with the target variables.The correlation results indicate that linear regression cannot fit the data.
+
+
+## ANOVA
+
+In this part, we will use ANOVA to determine whether or not there is a significant relationship between the variables of interest, as well as which variables have a significant influence on our target variables.
+
+1) Hypothesis testing on research question
+ 
+ H0: There is no significant relationship between tomato quantity and tomato variety.
+ 
+ H1: There is a significant relationship between tomato quantity and tomato variety.
+ 
+ 
+Result:
+```{r}
+
+summary(aov(log(Quantity)~Variety,data=farmdat2))
+```
+ 
+There is no significant relationship between tomato quantity and tomato variety since the p-value of 0.0686 is bigger than the significance level of 0.05. At a 95% confidence level, we found that tomato varieties have no effect on quantity.
+
+
+2) Hypothesis testing on research question
+
+Hypothesis
+ 
+ H0: There is no relationship between tomato quantity and tomato sub-unit.
+ 
+ H1: There is a relationship between tomato quantity and tomato sub-unit.
+ 
+  
+Result:
+```{r}
+
+summary(aov(log(Quantity)~Sub_Unit,data=farmdat2))
+```
+ 
+Because the p-value of 0.000171 is smaller than the significance level of 0.05, there is a significant relationship between tomato quantity and tomato sub-unit, implying that sub-units have a major impact on tomato quantity at a 95 percent level of significance.
+
+
+TukeyHSD Post hoc
+```{r}
+TukeyHSD(aov(log(Quantity)~Sub_Unit,data=farmdat2))
+```
+
+According to the Tukey post-hoc test, the following sub-units have a significant influence on tomato quantity: Laura - Penn Stater's Cafe, Pollock's Cafe, Redifer's Cafe, and Findlay's Cafe 
+
+3) Hypothesis testing on research question
+
+ H0: There is no significant relationship between tomato unit price and tomato variety.
+ 
+ H1: There is a significant relationship between tomato unit price and tomato variety.
+ 
+ 
+ 
+ Result:
+```{r}
+summary(aov(log(Unit_Price)~Variety,data=farmdat2))
+```
+
+Because the p-value of 1.17e-14 is less than the significance level of 0.05, there is a significant relationship between tomato unit price and tomato variety at a 95 percent level of significance, showing that tomato varieties have a substantial influence on the price.
+
+
+TukeyHSD Post hoc
+```{r}
+TukeyHSD(aov(log(Unit_Price)~Variety,data=farmdat2))
+```
+ 
+According to the Tukey post-hoc test, the following varieties have a significant influence on unit price of the tomatoes: Slicers-Cherry, Slicers-Grape, Roma-Heirloom, and Slicers-Heirloom.
+
+
+
+
+4) Hypothesis testing on research question
+
+ H0: There is no significant relationship between tomato unit price and tomato sub-unit.
+ 
+ H1: There is a significant relationship between tomato unit price and tomato sub-unit.
+ 
+  Result:
+```{r}
+summary(aov(log(Unit_Price)~Sub_Unit,data=farmdat2))
+```
+ 
+ 
+There is no significant relationship between tomato unit price and tomato sub-unit because p-value of 0.383 is greater than the significance level of 0.05. We conclude that the sub-units of the tomatoes do not influence the price of the tomatoes at a 95% level of confidence.
+
+
+
+
+
+## Conclusion
+
+To summarise all that has been stated, the varieties that impact tomato prices include Slicers-Cherry, Slicers-Grape, Roma-Heirloom, and Slicers-Heirloom. As a result, while growing tomatoes, we should examine the variety because it has a considerable impact on the price. The tomato's sub-units have a significant impact on its quantity. The following sub-units have a substantial influence on the quantity of the tomato: Laura - Penn Stater's Cafe, Pollock's Cafe, Redifer's Cafe, and Findlay's Cafe. However, the sub-units have no impact on the price of the tomatoes, and the variety of the tomato has no affect on the quantity of the tomato.
+
+ 
+ 
+ 
+ 
+ 
+
